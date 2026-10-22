@@ -1,0 +1,42 @@
+# Slovo for Windows: builds Slovo.exe, tests it on Windows and puts it into a draft release "windows-test".
+name: Windows
+
+on:
+  push:
+    branches: [windows]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: false
+      - name: Text transformer tests
+        run: node windows/test/transform.test.mjs
+      - name: Build Slovo.exe
+        shell: bash
+        run: bash windows/build.sh
+      - name: Test Slovo.exe
+        run: windows/test/e2e.ps1
+      - name: Draft release with the build
+        if: always()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for id in $(gh api "repos/$GITHUB_REPOSITORY/releases" --jq '.[] | select(.draft and .tag_name == "windows-test") | .id'); do
+            gh api -X DELETE "repos/$GITHUB_REPOSITORY/releases/$id"
+          done
+          shopt -s nullglob
+          files=(windows/dist/*)
+          [ ${#files[@]} -gt 0 ] || exit 0
+          gh release create windows-test --draft --target "$GITHUB_SHA" --title "Slovo для Windows (проверка)" \
+            --notes "Сборка $GITHUB_SHA, прогон $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" "${files[@]}"
