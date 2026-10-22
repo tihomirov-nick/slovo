@@ -10,8 +10,9 @@ $sample = "$userHome\Запись речи.wav"
 New-Item -ItemType Directory -Force $userHome | Out-Null
 Invoke-WebRequest "https://raw.githubusercontent.com/ggml-org/whisper.cpp/master/samples/jfk.wav" -OutFile $sample
 
+# Write-Host, not Write-Output: inside a function the output would become its result.
 function Annotate([string]$Level, [string]$Title, [string]$Message) {
-    Write-Output "::$Level title=$Title::$($Message.Replace('%', '%25').Replace("`r", '%0D').Replace("`n", '%0A'))"
+    Write-Host "::$Level title=$Title::$($Message.Replace('%', '%25').Replace("`r", '%0D').Replace("`n", '%0A'))"
 }
 
 function Connect {

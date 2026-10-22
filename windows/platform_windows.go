@@ -69,8 +69,9 @@ func findBrowser() string {
 // openBrowserWindow shows the page as an app window: no tabs or address bar, a profile of its own.
 func openBrowserWindow(url, profile string) {
 	if browser := findBrowser(); browser != "" {
-		cmd := exec.Command(browser, "--app="+url, "--user-data-dir="+profile, "--window-size=560,780",
-			"--no-first-run", "--no-default-browser-check", "--disable-background-mode", "--hide-crash-restore-bubble")
+		cmd := exec.Command(browser, "--app="+url, "--user-data-dir="+profile, "--window-size=560,740",
+			"--no-first-run", "--no-default-browser-check", "--disable-background-mode", "--hide-crash-restore-bubble",
+			"--disable-features=Translate")
 		if cmd.Start() == nil {
 			go cmd.Wait()
 			return

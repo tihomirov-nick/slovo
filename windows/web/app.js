@@ -799,6 +799,12 @@ window.addEventListener("drop", (event) => {
   handle.then((h) => openFile(file, h?.kind === "file" ? h : null), () => openFile(file, null));
 });
 
+// A window taller than the screen, as on a 1366×768 laptop, is fitted to it.
+if (window.screenY + window.outerHeight > screen.availTop + screen.availHeight) {
+  window.moveTo(window.screenX, screen.availTop);
+  window.resizeTo(window.outerWidth, Math.min(window.outerHeight, screen.availHeight));
+}
+
 // For screenshots: "#sheet=models" opens a sheet, "#still" draws the state once, without live updates.
 const debug = new URLSearchParams(location.hash.slice(1));
 state.sheet = debug.get("sheet");
